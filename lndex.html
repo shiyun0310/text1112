@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報名現況儀表板</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // 設定與報名表一致的莫蘭迪藍色系
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'morandi-blue': {
+                            50: '#f0f4f8',
+                            100: '#e1e7f0',
+                            200: '#c5d1e0',
+                            300: '#a7bace',
+                            400: '#89a0ba',
+                            500: '#6a86a6',
+                            600: '#4d6c92', 
+                            700: '#345279',
+                            800: '#1b3861',
+                            900: '#001e48',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f0f4f8; /* Morandi Blue 50 */
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-800">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- 儀表板標題 -->
+        <header class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-morandi-blue-800 mb-2">教學訓練工作坊報名現況</h1>
+            <p class="text-morandi-blue-600">即時數據儀表板 (每 60 秒自動更新)</p>
+        </header>
+
+        <!-- 數據卡片區塊 -->
+        <div id="stats-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            
+            <!-- 總報名人數卡片 (佔位符) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-morandi-blue-200">
+                <p class="text-sm font-medium text-morandi-blue-600 uppercase tracking-wider">總報名人數</p>
+                <p id="total-registrations" class="mt-1 text-4xl font-bold text-morandi-blue-900">--</p>
+            </div>
+            
+            <!-- 實體參與人數卡片 (佔位符) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-morandi-blue-200">
+                <p class="text-sm font-medium text-morandi-blue-600 uppercase tracking-wider">實體參與</p>
+                <p id="in-person-count" class="mt-1 text-4xl font-bold text-morandi-blue-900">--</p>
+            </div>
+            
+            <!-- 線上參與人數卡片 (佔位符) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-morandi-blue-200">
+                <p class="text-sm font-medium text-morandi-blue-600 uppercase tracking-wider">線上參與</p>
+                <p id="online-count" class="mt-1 text-4xl font-bold text-morandi-blue-900">--</p>
+            </div>
+
+             <!-- 計畫主持人人數卡片 (佔位符) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-morandi-blue-200">
+                <p class="text-sm font-medium text-morandi-blue-600 uppercase tracking-wider">擔任計畫主持人 (是)</p>
+                <p id="director-yes-count" class="mt-1 text-4xl font-bold text-morandi-blue-900">--</p>
+            </div>
+        </div>
+
+        <!-- 細節數據區塊：參與方式 & 職類分佈 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            
+            <!-- 參與方式分佈 -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-morandi-blue-200">
+                <h2 class="text-xl font-semibold text-morandi-blue-800 mb-4 border-b pb-2">參與方式分佈</h2>
+                <div id="participation-breakdown" class="space-y-3">
+                    <!-- 圖表內容將在這裡動態生成 -->
+                </div>
+            </div>
+
+            <!-- 職類分佈 (Top 5) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-morandi-blue-200">
+                <h2 class="text-xl font-semibold text-morandi-blue-800 mb-4 border-b pb-2">職類分佈 (前五名)</h2>
+                <div id="profession-breakdown" class="space-y-3">
+                    <!-- 圖表內容將在這裡動態生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 最近報名紀錄表格 -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-morandi-blue-200 overflow-x-auto">
+            <h2 class="text-xl font-semibold text-morandi-blue-800 mb-4 border-b pb-2">最近報名紀錄</h2>
+            <table class="min-w-full divide-y divide-morandi-blue-200">
+                <thead class="bg-morandi-blue-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-morandi-blue-700 uppercase tracking-wider">提交時間</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-morandi-blue-700 uppercase tracking-wider">姓名</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-morandi-blue-700 uppercase tracking-wider">機構名</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-morandi-blue-700 uppercase tracking-wider">職類</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-morandi-blue-700 uppercase tracking-wider">參與方式</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-registrations-body" class="bg-white divide-y divide-morandi-blue-100">
+                    <!-- 紀錄將在這裡動態生成 -->
+                </tbody>
+            </table>
+            <p id="no-data-message" class="text-center text-gray-500 py-4 hidden">尚無報名數據。</p>
+        </div>
+
+        <div class="text-center mt-8 text-sm text-gray-500">
+             <p>最後更新時間: <span id="last-updated">--</span></p>
+             <p>數據來源：Google Apps Script Web App</p>
+        </div>
+    </div>
+
+    <!-- JavaScript for Data Fetching and Rendering -->
+    <script>
+        // Apps Script Web App URL (與報名表 URL 相同)
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3GYNceTXPi-lSIkl7MpRTbVGNopRv0Q8CKmZbrAP2cW-OxRs30w5mWVhzXw9NoN8Npw/exec";
+        
+        // --- 資料獲取與處理 ---
+        
+        async function fetchRegistrationData() {
+            try {
+                // 發送 GET 請求給 Apps Script，明確使用 CORS 模式
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'GET',
+                    mode: 'cors' 
+                });
+
+                if (!response.ok) {
+                    // 如果 HTTP 狀態碼不是 200 (例如 403, 404, 500)，拋出錯誤
+                    throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}. 可能是 Apps Script 部署版本或權限設置錯誤。`);
+                }
+
+                const result = await response.json();
+
+                if (result.result === 'success') {
+                    // 成功獲取資料
+                    processAndRenderData(result.data);
+                } else {
+                    // 處理 Apps Script 內部拋出的錯誤 (例如讀取試算表失敗)
+                    throw new Error(result.message || "Apps Script 資料讀取失敗，請檢查 Apps Script 日誌。");
+                }
+
+            } catch (error) {
+                console.error("儀表板資料獲取錯誤:", error);
+                
+                // 顯示更詳細的錯誤信息
+                const errorMessage = `載入失敗。請檢查： 1. Apps Script 是否已部署新版本 (doGet)。 2. 錯誤訊息: ${error.message}`;
+                
+                document.getElementById('total-registrations').textContent = '載入失敗';
+                document.getElementById('no-data-message').textContent = errorMessage;
+                document.getElementById('no-data-message').classList.remove('hidden');
+                
+            } finally {
+                // 更新時間戳
+                document.getElementById('last-updated').textContent = new Date().toLocaleString('zh-TW', {
+                    year: 'numeric', month: '2-digit', day: '2-digit', 
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            }
+        }
+        
+        // --- 數據處理與渲染 ---
+
+        function processAndRenderData(data) {
+            if (data.length === 0) {
+                document.getElementById('total-registrations').textContent = '0';
+                document.getElementById('no-data-message').classList.remove('hidden');
+                document.getElementById('recent-registrations-body').innerHTML = '';
+                document.getElementById('in-person-count').textContent = '0';
+                document.getElementById('online-count').textContent = '0';
+                document.getElementById('director-yes-count').textContent = '0';
+                document.getElementById('participation-breakdown').innerHTML = '<p class="text-gray-500">尚無數據。</p>';
+                document.getElementById('profession-breakdown').innerHTML = '<p class="text-gray-500">尚無數據。</p>';
+                return;
+            }
+
+            document.getElementById('no-data-message').classList.add('hidden');
+            
+            // 1. 總覽數據
+            const total = data.length;
+            document.getElementById('total-registrations').textContent = total;
+            
+            // 2. 參與方式 & 主持人身份統計
+            const participationCounts = {};
+            const directorCounts = {};
+            const professionCounts = {};
+
+            data.forEach(item => {
+                const method = item.participation_method || '未填寫';
+                participationCounts[method] = (participationCounts[method] || 0) + 1;
+
+                const director = item.is_director || '未填寫';
+                directorCounts[director] = (directorCounts[director] || 0) + 1;
+
+                const profession = item.profession || '未填寫';
+                professionCounts[profession] = (professionCounts[profession] || 0) + 1;
+            });
+
+            // 3. 渲染總覽卡片
+            document.getElementById('in-person-count').textContent = participationCounts['實體'] || 0;
+            document.getElementById('online-count').textContent = participationCounts['線上'] || 0;
+            document.getElementById('director-yes-count').textContent = directorCounts['是'] || 0;
+            
+            // 4. 渲染分佈圖 (Participation Breakdown)
+            renderBreakdown('participation-breakdown', participationCounts, total, ['實體', '線上']);
+
+            // 5. 渲染職類分佈 (Profession Breakdown - Top 5)
+            const sortedProfessions = Object.entries(professionCounts)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 5); // 取前五名
+            
+            const topProfessionCounts = Object.fromEntries(sortedProfessions);
+            const topProfessionTotal = sortedProfessions.reduce((sum, [, count]) => sum + count, 0);
+
+            renderBreakdown('profession-breakdown', topProfessionCounts, topProfessionTotal, sortedProfessions.map(([name]) => name));
+            
+            // 6. 渲染最近報名紀錄
+            renderRecentRegistrations(data);
+        }
+
+        // 渲染通用進度條分佈圖
+        function renderBreakdown(elementId, counts, total, keys) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            
+            if (total === 0) return;
+
+            const colorMap = {
+                '實體': 'bg-morandi-blue-600',
+                '線上': 'bg-morandi-blue-400',
+                '是': 'bg-green-600',
+                '否': 'bg-red-400',
+                '藥事': 'bg-indigo-500',
+                '醫事放射': 'bg-teal-500',
+                '醫事檢驗': 'bg-cyan-500',
+                '護理': 'bg-fuchsia-500',
+                '營養': 'bg-lime-500',
+                '呼吸治療': 'bg-orange-500', 
+                '聽力': 'bg-purple-500', 
+                '物理治療': 'bg-pink-500', 
+                '職能治療': 'bg-yellow-500', 
+                '臨床心理': 'bg-red-500', 
+                '語言治療': 'bg-emerald-500', 
+                '其他': 'bg-gray-400',
+                '未填寫': 'bg-yellow-400'
+            };
+            
+            keys.forEach(key => {
+                const count = counts[key] || 0;
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                const color = colorMap[key] || 'bg-morandi-blue-300'; // 默認顏色
+                
+                const html = `
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="font-medium">${key} (${count} 人)</span>
+                            <span class="text-morandi-blue-700">${percentage}%</span>
+                        </div>
+                        <div class="w-full bg-morandi-blue-100 rounded-full h-3">
+                            <div class="${color} h-3 rounded-full transition-all duration-500" style="width: ${percentage}%;"></div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+        
+        // 渲染表格
+        function renderRecentRegistrations(data) {
+            const tbody = document.getElementById('recent-registrations-body');
+            tbody.innerHTML = ''; // 清空舊數據
+
+            // 按時間戳降序排序，取最新的 10 筆
+            const recentData = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 10);
+
+            recentData.forEach(item => {
+                // 格式化時間
+                const formattedTime = new Date(item.timestamp).toLocaleString('zh-TW', { 
+                    month: '2-digit', day: '2-digit', 
+                    hour: '2-digit', minute: '2-digit' 
+                });
+
+                const row = `
+                    <tr class="hover:bg-morandi-blue-50 transition duration-150">
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${formattedTime}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-morandi-blue-800">${item.name}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${item.institution}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${item.profession}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.participation_method === '實體' ? 'bg-morandi-blue-100 text-morandi-blue-800' : 'bg-green-100 text-green-800'}">
+                                ${item.participation_method}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        // 頁面載入時和設定間隔定時刷新
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchRegistrationData(); 
+            // 每 60 秒刷新一次數據
+            setInterval(fetchRegistrationData, 60000); 
+        });
+    </script>
+</body>
+</html>
